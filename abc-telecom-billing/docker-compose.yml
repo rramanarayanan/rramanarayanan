@@ -1,0 +1,137 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: abc-telecom-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: abc_telecom
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - abc-network
+
+  eureka-server:
+    build:
+      context: ./abc-telecom-eureka-server
+      dockerfile: Dockerfile
+    container_name: abc-eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - abc-network
+    depends_on:
+      - postgres
+
+  api-gateway:
+    build:
+      context: ./abc-telecom-api-gateway
+      dockerfile: Dockerfile
+    container_name: abc-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - abc-network
+    depends_on:
+      - eureka-server
+
+  auth-service:
+    build:
+      context: ./abc-telecom-auth-service
+      dockerfile: Dockerfile
+    container_name: abc-auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/abc_telecom_auth
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - abc-network
+    depends_on:
+      - postgres
+      - eureka-server
+
+  user-service:
+    build:
+      context: ./abc-telecom-user-service
+      dockerfile: Dockerfile
+    container_name: abc-user-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/abc_telecom_user
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - abc-network
+    depends_on:
+      - postgres
+      - eureka-server
+
+  customer-service:
+    build:
+      context: ./abc-telecom-customer-service
+      dockerfile: Dockerfile
+    container_name: abc-customer-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/abc_telecom_customer
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - abc-network
+    depends_on:
+      - postgres
+      - eureka-server
+
+  billing-service:
+    build:
+      context: ./abc-telecom-billing-service
+      dockerfile: Dockerfile
+    container_name: abc-billing-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/abc_telecom_billing
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - abc-network
+    depends_on:
+      - postgres
+      - eureka-server
+
+  payment-service:
+    build:
+      context: ./abc-telecom-payment-service
+      dockerfile: Dockerfile
+    container_name: abc-payment-service
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/abc_telecom_payment
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - abc-network
+    depends_on:
+      - postgres
+      - eureka-server
+
+networks:
+  abc-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
