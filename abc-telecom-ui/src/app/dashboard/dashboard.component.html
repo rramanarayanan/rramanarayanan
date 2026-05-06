@@ -1,0 +1,30 @@
+<div class="dashboard-container">
+  <div *ngIf="loading" class="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <div *ngIf="!loading" class="dashboard-content">
+    <mat-card class="welcome-card">
+      <mat-card-title>Welcome, {{ currentUser?.username }}!</mat-card-title>
+      <mat-card-content>
+        <p>You are logged in as {{ currentUser?.role }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="dashboard-grid">
+      <mat-card class="info-card">
+        <mat-card-title>Outstanding Invoices</mat-card-title>
+        <mat-card-content>
+          <div class="invoice-count">{{ invoices.length }}</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="info-card">
+        <mat-card-title>Total Due</mat-card-title>
+        <mat-card-content>
+          <div class="amount">{{ (invoices | slice:0:1)[0]?.totalAmount || 0 | currency }}</div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

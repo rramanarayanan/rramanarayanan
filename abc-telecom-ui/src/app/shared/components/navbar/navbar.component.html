@@ -1,0 +1,12 @@
+<mat-toolbar color="primary">
+  <span class="spacer"></span>
+  <span class="title">ABC Telecom Billing System</span>
+  <span class="spacer"></span>
+  <div *ngIf="authService.isLoggedIn()" class="user-menu">
+    <span class="user-info">{{ authService.currentUserValue?.username }}</span>
+    <button mat-button (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      Logout
+    </button>
+  </div>
+</mat-toolbar>
